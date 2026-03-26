@@ -43,6 +43,7 @@ for i = 1:length(V)
         % At hover
         vi_glauert(i)   = vi_hover;
         vi_lowspeed(i)  = vi_hover;
+        vi_highspeed(i) = NaN;
     else
         % --- General Glauert implicit equation --
         % W = 2*rho*A*vi*sqrt((V*cos(alpha_d))^2 + (V*sin(alpha_d)+vi)^2)
@@ -59,6 +60,8 @@ for i = 1:length(V)
         vibar_low = sqrt(-Vbar^2/2 + sqrt(1 + Vbar^4/4));
         vi_lowspeed(i) = vibar_low * vi_hover;
 
+        % --- High-speed approximation ----
+        vi_highspeed(i) = W / (2 * rho * A_main * Vi);
     end
 end
 
