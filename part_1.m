@@ -1,0 +1,95 @@
+clear;
+clc; 
+close all;
+
+
+
+
+
+
+% Induced Velocity: questio 1.2
+
+%% 0 Load constants
+run('constants.m');
+
+% atmospheric / flight assumptions
+rho = 1.225;         % Air density at sea level [kg/m^3]
+g   = 9.81;          % Gravity [m/s^2]
+
+% Choose helicopter mass for the calculation
+m = MTOW;            % [kg]
+W = m * g;           % Weight [N]
+
+%% 1 Hover induced velocity
+vi_hover = sqrt(W / (2 * rho * A_main));   % [m/s]
+
+fprintf('Hover induced velocity: %.3f m/s\n', vi_hover);
+
+%% 2 forward speed range and preallocate
+V = linspace(0, 100, 300);   % Forward speed [m/s]
+
+% preallocate vector vi
+vi_glauert   = zeros(size(V));   % Numerical Glauert solution
+vi_lowspeed  = zeros(size(V));   % Lowspeed closed-form solution
+vi_highspeed = zeros(size(V));   % High-speed approximation
+
+%% 3 Disc angle of attack assumption
+alpha_d = 0;   % [rad]
+
+%% 4 solve induced velocity in forward flitgh
+for i = 1:length(V)
+    Vi = V(i);
+
+    if Vi == 0
+        % At hover
+        vi_glauert(i)   = vi_hover;
+        vi_lowspeed(i)  = vi_hover;
+        vi_highspeed(i) = NaN;
+    else
+        % --- General Glauert implicit equation --
+        % W = 2*rho*A*vi*sqrt((V*cos(alpha_d))^2 + (V*sin(alpha_d)+vi)^2)
+        f = @(vi) 2 * rho * A_main * vi .* ...
+            sqrt((Vi*cos(alpha_d))^2 + (Vi*sin(alpha_d) + vi).^2) - W;
+
+        % Use hover induced velocity as initial guess
+        vi_guess = max(vi_hover/2, 0.1);
+
+        vi_glauert(i) = fzero(f, vi_guess);
+
+        % --- Low-speed analytical approximation from lecture slides --
+        Vbar = Vi / vi_hover;
+        vibar_low = sqrt(-Vbar^2/2 + sqrt(1 + Vbar^4/4));
+        vi_lowspeed(i) = vibar_low * vi_hover;
+
+        % --- High-speed approximation ----
+        vi_highspeed(i) = W / (2 * rho * A_main * Vi);
+    end
+end
+
+%% Plot
+figure;
+plot(V, vi_glauert, 'LineWidth', 1.8); hold on;
+plot(V, vi_lowspeed, '--', 'LineWidth', 1.5);
+grid on;
+xlabel('Forward speed V [m/s]', 'FontSize', 14);
+ylabel('Induced velocity v_i [m/s]', 'FontSize', 14);
+title('Main rotor induced velocity versus forward speed', 'FontSize', 16);
+legend('Glauert numerical', 'Low-speed approximation', ...
+       'Location', 'northeast', 'FontSize', 12);
+set(gca, 'FontSize', 12);
+
+%% dimensionless plot
+Vbar = V / vi_hover;
+vibar_glauert = vi_glauert / vi_hover;
+vibar_low     = vi_lowspeed / vi_hover;
+
+figure;
+plot(Vbar, vibar_glauert, 'LineWidth', 1.8); hold on;
+plot(Vbar, vibar_low, '--', 'LineWidth', 1.5);
+grid on;
+xlabel('$\bar{V} = V / v_{i,h}$', 'Interpreter', 'latex', 'FontSize', 14);
+ylabel('$\bar{v}_i = v_i / v_{i,h}$', 'Interpreter', 'latex', 'FontSize', 14);
+title('Non-dimensional induced velocity versus forward speed', 'FontSize', 16);
+legend('Glauert numerical', 'Low-speed approximation', ...
+       'Location', 'northeast', 'FontSize', 12);
+set(gca, 'FontSize', 12);
