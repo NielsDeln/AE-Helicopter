@@ -2,19 +2,16 @@ clear;
 clc; 
 close all;
 
-
-
-
-
-
-% Induced Velocity: questio 1.2
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Induced Velocity: questio 1.2 %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% 0 Load constants
 run('constants.m');
 
 % atmospheric / flight assumptions
 rho = 1.225;         % Air density at sea level [kg/m^3]
-g   = 9.81;          % Gravity [m/s^2]
+g   = 9.80665;          % Gravity [m/s^2]
 
 % Choose helicopter mass for the calculation
 m = MTOW;            % [kg]
@@ -35,7 +32,7 @@ vi_lowspeed  = zeros(size(V));   % Lowspeed closed-form solution
 %% 3 Disc angle of attack assumption
 alpha_d = 0;   % [rad]
 
-%% 4 solve induced velocity in forward flitgh
+%% 4 solve induced velocity in forward flight
 for i = 1:length(V)
     Vi = V(i);
 
@@ -89,3 +86,34 @@ title('Non-dimensional induced velocity versus forward speed', 'FontSize', 16);
 legend('Glauert numerical', 'Low-speed approximation', ...
        'Location', 'northeast', 'FontSize', 12);
 set(gca, 'FontSize', 12);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Induced Velocity: questio 1.3 %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% 1 Hover Calculations
+sigma_m = solidity_main;
+OmegaR = tip_speed_main;
+C_D_p = input('Blade medium drag coefficient determined graphically:'); % DETERMINE GRAPHICALLY AS FUNCTION OF MED LIFT 
+
+% Actuator disc theory
+Pideal = W * vi_hover; % Ideal power in hover for MTOW in W
+FOM_ACT = 0.6; % Assumed Figure of merit
+Phov_ACT = Pideal / FOM_ACT; % True hover power in ACT assuming an FOM
+
+% Blade element theory
+k_main = 1.1; % Assumption
+Pi_main = k_main * Pideal; %
+Pp_main = sigma_m * C_D_p / 8 * rho * OmegaR^3 * A_main;
+Phov_BEM = Pi_main + Pp_main; % Power is induced plus profile drag
+FOM_BEM = Pideal / Phov_BEM; % FOM according to BEM theory
+
+%% 2 Forward Flight Calculations
+% Main rotor
+adv_ratio = V / OmegaR; % Array of advance ratios
+Pp_fw_main = Pp_main * (1 + adv_ratio^2); % Profile power of main rotors for forward velocities
+Pd_fw_main = Pp_main * 2 * adv_ratio^2; % Main rotor drag power for forward flight
+Pi_fw_main = 0; % ADD CALCULATION OF INDUCED POWER AS FUNC OF FWRD VEL.
+
+P_benett = Pp_main * (1 + 4.65 * adv_ratio^2); % Using Benett approx.
+
