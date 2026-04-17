@@ -2,7 +2,7 @@
 lbs_to_kg = 0.45359237;
 ft_to_m = 0.3048;
 slugft2_to_kgm2 = 1.35581795;
-Hp_to_KW = 0.735499;
+Hp_to_W = 0.735499 * 1e3;
 
 %% Helicopter constants %%
 MTOW = 10300 * lbs_to_kg; % kg
@@ -10,8 +10,10 @@ Mempty = 5546 * lbs_to_kg; % kg
 Mfuel = 1876  * lbs_to_kg; % kg
 
 N_engine = 2;
-P_TO = 1300 * Hp_to_KW; % KW
-P_const = 1300 * Hp_to_KW; % Kw
+P_TO = 1300 * Hp_to_W; % W
+P_const = 1300 * Hp_to_W; % W
+
+l_LOA = 16; % m (total length)
 
 % Rotor Parameters
 hinge_offset = 0.038;
