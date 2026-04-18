@@ -19,10 +19,9 @@ W = m * g;           % Weight [N]
 
 % Power calculations
 sigma_m = solidity_main;
-OmegaR = tip_speed_main;
-C_T = W / (rho * A_main * OmegaR^2); % [-] Approxed as weight coeff.
-C_Lbar = 6.6 * C_T / sigma_m; % [-] Medium lift coeff.
-C_D_p = 0.015; % PROPER VALUE NEEDS TO BE FOUND
+OmegaR_m = tip_speed_main;
+sigma_t = solidity_tail;
+OmegaR_t = tip_speed_tail;
 A_eq = 12.6 * ft_to_m^2; % Equivalent plate area Found in https://doi.org/10.2514/6.2024-1117
 
 %% 1 Hover induced velocity
@@ -102,42 +101,77 @@ set(gca, 'FontSize', 12);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% 1 Hover Calculations
+% Coefficient calculations
+C_T_m = W / (rho * A_main * OmegaR_m^2); % [-] Approxed as weight coeff.
+C_Lbar_m = 6.6 * C_T_m / sigma_m; % [-] Medium lift coeff.
+C_Dp_m = 0.011; % PROPER VALUE NEEDS TO BE FOUND
+
 % Actuator disc theory
-Pideal = W * vi_hover; % Ideal power in hover for MTOW in W
+Pideal = W * vi_hover; % Ideal power in hover for MTOW [W]
 FOM_ACT = 0.74; % Assumed Hover Figure of Merit (found in 1977 paper)
 Phov_ACT = Pideal / FOM_ACT; % True hover power in ACT assuming an FOM
 
 % Blade element theory
 k_main = 1.15; % Assumption
 Pi_main = k_main * Pideal; %
-Pp_main = sigma_m * C_D_p / 8 * rho * OmegaR^3 * A_main;
+Pp_main = sigma_m * C_Dp_m / 8 * rho * OmegaR_m^3 * A_main;
 Phov_BEM = Pi_main + Pp_main; % Power is induced plus profile drag
 FOM_BEM = Pideal / Phov_BEM; % FOM according to BEM theory
 
 %% 2 Forward Flight Calculations
 % Main rotor
-adv_ratio = V / OmegaR; % Array of advance ratios
+adv_ratio_m = V / OmegaR_m; % Array of advance ratios
 
-Ppar_fw_main = Dpar .* V; % Main rotor parasitic power
-Pi_fw_main = k_main * W * vi_glauert; % glauert induced velocity is taken
-P_benett = Pp_main * (1 + 4.65 * adv_ratio.^2); % Using Benett approx.
+Ppar_fw_m = Dpar .* V; % Main rotor parasitic power
+Pi_fw_m = k_main * W * vi_glauert; % glauert induced velocity is taken
+P_benett_m = Pp_main * (1 + 4.65 * adv_ratio_m.^2); % Using Benett approx.
 
-P_main = P_benett + Pi_fw_main + Ppar_fw_main;
+P_main = P_benett_m + Pi_fw_m + Ppar_fw_m; % Main rotor power
 
 % Tail rotor
+adv_ratio_t = V / OmegaR_t;
+
+% Tail rotor thrust
 k_tr = 1.4;
 l_tail = l_LOA - R_main - R_tail;
-T_tail = P_main / (OmegaR/R_main * l_tail);
+T_tail = P_main / (OmegaR_m/R_main * l_tail);
+
+% coefficient calculations
+C_T_t = T_tail / (rho * A_tail * OmegaR_t^2); % [-] Approxed as weight coeff.
+C_Lbar_t = 6.6 * C_T_t / sigma_t; % [-] Medium lift coeff.
+C_Dp_t = 0.0075; % value taken from graph in lecture notes
+
 vi_tail = sqrt(T_tail / (2 * rho * A_tail));
-Pi_fw_tail = 1.1 * k_tr * T_tail .* vi_tail;
+Pi_fw_t = 1.1 * k_tr * T_tail .* vi_tail;
 
-P_total = P_main + Pi_fw_tail;
+Pp_tail = sigma_t * C_Dp_t / 8 * rho * OmegaR_t^3 * A_tail;
+P_benett_t = Pp_tail * (1 + 4.65 * adv_ratio_t.^2);
 
+P_tail = Pi_fw_t + P_benett_t + Pp_tail; % Tail rotor power
+
+% Total power 
+% Total power
+P_total = P_main + P_tail;
+
+% Minimum power and corresponding speed
 [P_min, idx_min] = min(P_total);
 V_Pmin = V(idx_min);
 
 fprintf('Minimum Power required: %.3f KW\n', P_min/1e3);
 fprintf('Forward Velocity for minimum power required: %.3f m/s\n', V_Pmin);
+
+% Compute power per speed (slope from origin) and find its minimum.
+slope = P_total ./ V;
+% Avoid division by zero at V=0 by setting slope(1) to large value
+if V(1) == 0
+    slope(1) = inf;
+end
+[slope_min, idx_range] = min(slope);
+V_range = V(idx_range);
+P_range = P_total(idx_range);
+
+fprintf('Power for maximum range (tangent slope): %.3f KW\n', P_range/1e3);
+fprintf('Forward Velocity for maximum range: %.3f m/s\n', V_range);
 
 
 figure;
