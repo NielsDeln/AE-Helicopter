@@ -22,7 +22,7 @@ sigma_m = solidity_main;
 OmegaR = tip_speed_main;
 C_T = W / (rho * A_main * OmegaR^2); % [-] Approxed as weight coeff.
 C_Lbar = 6.6 * C_T / sigma_m; % [-] Medium lift coeff.
-C_D_p = 0.015; % TO BE SOLVED
+C_D_p = 0.015; % PROPER VALUE NEEDS TO BE FOUND
 A_eq = 12.6 * ft_to_m^2; % Equivalent plate area Found in https://doi.org/10.2514/6.2024-1117
 
 %% 1 Hover induced velocity
@@ -129,9 +129,15 @@ k_tr = 1.4;
 l_tail = l_LOA - R_main - R_tail;
 T_tail = P_main / (OmegaR/R_main * l_tail);
 vi_tail = sqrt(T_tail / (2 * rho * A_tail));
-Pi_fw_tail = 1.1 * k_tr .* T_tail .* vi_tail;
+Pi_fw_tail = 1.1 * k_tr * T_tail .* vi_tail;
 
 P_total = P_main + Pi_fw_tail;
+
+[P_min, idx_min] = min(P_total);
+V_Pmin = V(idx_min);
+
+fprintf('Minimum Power required: %.3f KW\n', P_min/1e3);
+fprintf('Forward Velocity for minimum power required: %.3f m/s\n', V_Pmin);
 
 
 figure;
