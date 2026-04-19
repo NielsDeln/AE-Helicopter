@@ -2,6 +2,8 @@ clear;
 clc; 
 close all;
 
+plots = true;
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Induced Velocity: questio 1.2 %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -69,32 +71,37 @@ for i = 1:length(V)
 end
 
 %% Plot
-figure;
-plot(V, vi_glauert, 'LineWidth', 1.8); hold on;
-plot(V, vi_lowspeed, '--', 'LineWidth', 1.5);
-grid on;
-xlabel('Forward speed V [m/s]', 'FontSize', 14);
-ylabel('Induced velocity v_i [m/s]', 'FontSize', 14);
-title('Main rotor induced velocity versus forward speed', 'FontSize', 16);
-legend('Glauert numerical', 'Low-speed approximation', ...
-       'Location', 'northeast', 'FontSize', 12);
-set(gca, 'FontSize', 12);
+if plots
+    figure;
+    plot(V, vi_glauert, 'LineWidth', 1.8); hold on;
+    plot(V, vi_lowspeed, '--', 'LineWidth', 1.5);
+    grid on;
+    xlabel('Forward speed V [m/s]', 'FontSize', 14);
+    ylabel('Induced velocity v_i [m/s]', 'FontSize', 14);
+    title('Main rotor induced velocity versus forward speed', 'FontSize', 16);
+    legend('Glauert numerical', 'Low-speed approximation', ...
+           'Location', 'northeast', 'FontSize', 12);
+    set(gca, 'FontSize', 12);
+end
 
 %% dimensionless plot
 Vbar = V / vi_hover;
 vibar_glauert = vi_glauert / vi_hover;
 vibar_low     = vi_lowspeed / vi_hover;
 
-figure;
-plot(Vbar, vibar_glauert, 'LineWidth', 1.8); hold on;
-plot(Vbar, vibar_low, '--', 'LineWidth', 1.5);
-grid on;
-xlabel('$\bar{V} = V / v_{i,h}$', 'Interpreter', 'latex', 'FontSize', 14);
-ylabel('$\bar{v}_i = v_i / v_{i,h}$', 'Interpreter', 'latex', 'FontSize', 14);
-title('Non-dimensional induced velocity versus forward speed', 'FontSize', 16);
-legend('Glauert numerical', 'Low-speed approximation', ...
-       'Location', 'northeast', 'FontSize', 12);
-set(gca, 'FontSize', 12);
+
+if plots
+    figure;
+    plot(Vbar, vibar_glauert, 'LineWidth', 1.8); hold on;
+    plot(Vbar, vibar_low, '--', 'LineWidth', 1.5);
+    grid on;
+    xlabel('$\bar{V} = V / v_{i,h}$', 'Interpreter', 'latex', 'FontSize', 14);
+    ylabel('$\bar{v}_i = v_i / v_{i,h}$', 'Interpreter', 'latex', 'FontSize', 14);
+    title('Non-dimensional induced velocity versus forward speed', 'FontSize', 16);
+    legend('Glauert numerical', 'Low-speed approximation', ...
+           'Location', 'northeast', 'FontSize', 12);
+    set(gca, 'FontSize', 12);
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Induced Velocity: questio 1.3 %%%
@@ -173,13 +180,14 @@ P_range = P_total(idx_range);
 fprintf('Power for maximum range (tangent slope): %.3f KW\n', P_range/1e3);
 fprintf('Forward Velocity for maximum range: %.3f m/s\n', V_range);
 
-
-figure;
-plot(V, P_total, 'LineWidth', 1.8); hold on;
-grid on;
-xlabel('$V$', 'Interpreter', 'latex', 'FontSize', 14);
-ylabel('$P_{total}$', 'Interpreter', 'latex', 'FontSize', 14);
-title('Total power versus forward speed', 'FontSize', 16);
-legend('Total Power', 'Location', 'northeast', 'FontSize', 12);
-ylim([0, 1e6]);
-set(gca, 'FontSize', 12);
+if plots
+    figure;
+    plot(V, P_total, 'LineWidth', 1.8); hold on;
+    grid on;
+    xlabel('$V$', 'Interpreter', 'latex', 'FontSize', 14);
+    ylabel('$P_{total}$', 'Interpreter', 'latex', 'FontSize', 14);
+    title('Total power versus forward speed', 'FontSize', 16);
+    legend('Total Power', 'Location', 'northeast', 'FontSize', 12);
+    ylim([0, 1e6]);
+    set(gca, 'FontSize', 12);
+end

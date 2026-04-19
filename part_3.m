@@ -2,9 +2,11 @@ clear;
 clc; 
 close all;
 
+plots = false;
+
 %% 0 Load constants and Design Params.
 run('part_1.m');
-cl_alpha = 2*pi; % Lift slope curve
+cl_alpha = 2*pi; % ASSUMPTION Lift slope curve
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -65,10 +67,23 @@ max_CT_err = max(abs(C_T_ver - C_T_glau));
 fprintf('Max blade-element C_T residual: %.2e  (should be ~0)\n', max_CT_err)
 
 % Plot a1 and theta0 versus flight speed V
-figure;
-plot(V, a1, 'LineWidth', 1.5); hold on;
-plot(V, theta0, 'LineWidth', 1.5);
-ylabel('Control deflection [deg]', 'FontSize', 14);
-xlabel('Velocity V [m/s]', 'FontSize', 14);
-grid on;
-legend('Long. cyclic, a_1','Collective, \theta_0','Location','best');
+if plots
+    figure;
+    plot(V, a1, 'LineWidth', 1.5); hold on;
+    plot(V, theta0, 'LineWidth', 1.5);
+    ylabel('Control deflection [deg]', 'FontSize', 14);
+    xlabel('Velocity V [m/s]', 'FontSize', 14);
+    grid on;
+    legend('Long. cyclic, a_1','Collective, \theta_0','Location','best');
+    set(gca, 'FontSize', 12);
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Numerical Simulation: questio 3.2 %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% Setup
+
+
+%% Non-linear EOM
+
