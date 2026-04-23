@@ -106,7 +106,7 @@ end
 % Coefficient calculations
 C_T_m = W / (rho * A_main * OmegaR_m^2); % [-] Approxed as weight coeff.
 C_Lbar_m = 6.6 * C_T_m / sigma_m; % [-] Medium lift coeff.
-C_Dp_m = 0.011; % PROPER VALUE NEEDS TO BE FOUND
+C_Dp_m = 0.00568; % PROPER VALUE NEEDS TO BE FOUND
 
 % Actuator disc theory
 Pideal = W * vi_hover; % Ideal power in hover for MTOW [W]

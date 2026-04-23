@@ -22,6 +22,7 @@ states.u = 0;
 states.w = 0;
 states.q = 0;
 states.theta_f = 0;
+states.V_z = 0;
 
 Simulink.Bus.createObject(states);
 
@@ -36,6 +37,9 @@ xdot.u_dot = 0;
 xdot.w_dot = 0;
 xdot.q_dot = 0;
 xdot.theta_f_dot = 0;
+xdot.V_z = 0;
+xdot.pos = 0;
+xdot.h = 0;
 
 Simulink.Bus.createObject(xdot);
 
@@ -60,7 +64,7 @@ p.A = A_main;
 p.A_eq = A_eq;
 
 
-p.cl_alpha = 2 * pi;
+p.cl_alpha = 5.73;
 p.Iy = 22713;
 p.I_bl = 524.4986;
 p.Lock = p.rho * p.cl_alpha * c_main * R_main^4 / p.I_bl; % lock number
