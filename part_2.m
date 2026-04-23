@@ -1,5 +1,8 @@
 clear; close all; clc;
+
 run('constants.m');
+rho = 1.225;
+a_l = 5.7;
 
 %% Inputs
 V = 20;
@@ -27,9 +30,22 @@ psi_deg = rad2deg(psi);
 theta = theta0 + theta1c*cos(psi) + theta1s*sin(psi);
 
 %% Flapping model
-a0 = deg2rad(3);
-a1 = deg2rad(2);
-b1 = deg2rad(1);
+
+
+I_blade = J_main / N_blade_main;
+
+mu = V / (Omega * R);
+lambda_i = vi / (Omega * R);
+lambda_c = 0;
+
+gamma = rho * c * a_l * R^4 / I_blade;
+
+a0 = (gamma/8) * ( theta0*(1 + mu^2) - (4/3)*(lambda_i + lambda_c) );
+
+a1 = ( (8/3)*mu*theta0 - mu*(lambda_i + lambda_c) - q/Omega ) / (1 - mu^2/2);
+
+b1 = ( -(4/3)*mu*(q/Omega) ) / (1 + mu^2/2);
+
 
 beta = a0 - a1*cos(psi) - b1*sin(psi);
 dbeta_dpsi = a1*sin(psi) - b1*cos(psi);
@@ -71,7 +87,7 @@ legend('r/R = 0.3','r/R = 0.5','r/R = 0.7','r/R = 0.9','Location','best');
 
 %% Angle of attack contours
 [PsiGrid, RbarGrid] = meshgrid(psi, rbar_vec);
-X = RbarGrid .* cos(PsiGrid);
+X = - RbarGrid .* cos(PsiGrid);
 Y = RbarGrid .* sin(PsiGrid);
 
 alpha_deg = rad2deg(alpha_mat);
@@ -123,3 +139,6 @@ fprintf('mu = %.4f\n', mu);
 fprintf('a0 = %.4f deg\n', rad2deg(a0_fit));
 fprintf('a1 = %.4f deg\n', rad2deg(a1_fit));
 fprintf('b1 = %.4f deg\n', rad2deg(b1_fit));
+
+
+
