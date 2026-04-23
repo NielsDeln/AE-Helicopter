@@ -3,17 +3,24 @@ lbs_to_kg = 0.45359237;
 ft_to_m = 0.3048;
 slugft2_to_kgm2 = 1.35581795;
 Hp_to_W = 0.735499 * 1e3;
+kts_to_ms = 0.5144444444;
+% atmospheric / flight assumptions
+rho = 1.225;         % Air density at sea level [kg/m^3]
+g   = 9.80665;          % Gravity [m/s^2]
 
 %% Helicopter constants %%
 MTOW = 10300 * lbs_to_kg; % kg
 Mempty = 5546 * lbs_to_kg; % kg
 Mfuel = 1876  * lbs_to_kg; % kg
 
+W = MTOW * g;
+
 N_engine = 2;
 P_TO = 1300 * Hp_to_W; % W
 P_const = 1300 * Hp_to_W; % W
 
 l_LOA = 16; % m (total length)
+A_eq = 12.6 * ft_to_m^2; % Equivalent plate area Found in https://doi.org/10.2514/6.2024-1117
 
 % Rotor Parameters
 hinge_offset = 0.038;

@@ -11,20 +11,15 @@ plots = true;
 %% 0 Load constants and Design Params.
 run('constants.m');
 
-% atmospheric / flight assumptions
-rho = 1.225;         % Air density at sea level [kg/m^3]
-g   = 9.80665;          % Gravity [m/s^2]
-
 % Choose helicopter mass for the calculation
 m = MTOW;            % [kg]
-W = m * g;           % Weight [N]
 
 % Power calculations
 sigma_m = solidity_main;
 OmegaR_m = tip_speed_main;
 sigma_t = solidity_tail;
 OmegaR_t = tip_speed_tail;
-A_eq = 12.6 * ft_to_m^2; % Equivalent plate area Found in https://doi.org/10.2514/6.2024-1117
+
 
 %% 1 Hover induced velocity
 vi_hover = sqrt(W / (2 * rho * A_main));   % [m/s]
@@ -115,8 +110,9 @@ C_Dp_m = 0.011; % PROPER VALUE NEEDS TO BE FOUND
 
 % Actuator disc theory
 Pideal = W * vi_hover; % Ideal power in hover for MTOW [W]
-FOM_ACT = 0.74; % Assumed Hover Figure of Merit (found in 1977 paper)
+FOM_ACT = 0.67; % Assumed Hover Figure of Merit (found in 1977 paper)
 Phov_ACT = Pideal / FOM_ACT; % True hover power in ACT assuming an FOM
+
 
 % Blade element theory
 k_main = 1.15; % Assumption
@@ -183,6 +179,10 @@ fprintf('Forward Velocity for maximum range: %.3f m/s\n', V_range);
 if plots
     figure;
     plot(V, P_total, 'LineWidth', 1.8); hold on;
+    plot(V, P_main, 'LineWidth', 1.8);
+    plot(V, P_tail, 'LineWidth', 1.8);
+    plot(V, Ppar_fw_m, 'LineWidth', 1.8)
+    plot(V, Pi_fw_m, 'LineWidth', 1.8)
     grid on;
     xlabel('$V$', 'Interpreter', 'latex', 'FontSize', 14);
     ylabel('$P_{total}$', 'Interpreter', 'latex', 'FontSize', 14);
