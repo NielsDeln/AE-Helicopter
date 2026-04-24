@@ -106,7 +106,7 @@ end
 % Coefficient calculations
 C_T_m = W / (rho * A_main * OmegaR_m^2); % [-] Approxed as weight coeff.
 C_Lbar_m = 6.6 * C_T_m / sigma_m; % [-] Medium lift coeff.
-C_Dp_m = 0.00568; % PROPER VALUE NEEDS TO BE FOUND
+C_Dp_m = 0.00568; % used graph in report
 
 % Actuator disc theory
 Pideal = W * vi_hover; % Ideal power in hover for MTOW [W]
@@ -178,16 +178,39 @@ fprintf('Forward Velocity for maximum range: %.3f m/s\n', V_range);
 
 if plots
     figure;
-    plot(V, P_total, 'LineWidth', 1.8); hold on;
-    plot(V, P_main, 'LineWidth', 1.8);
-    plot(V, P_tail, 'LineWidth', 1.8);
-    plot(V, Ppar_fw_m, 'LineWidth', 1.8)
-    plot(V, Pi_fw_m, 'LineWidth', 1.8)
+    h1 = plot(V, P_total*1e-3, 'LineWidth', 1.8); hold on;
+    h2 = plot(V, Ppar_fw_m*1e-3, 'LineWidth', 1.8);
+    h3 = plot(V, Pi_fw_m*1e-3, 'LineWidth', 1.8);
+    h4 = plot(V, P_tail*1e-3, 'LineWidth', 1.8);
     grid on;
-    xlabel('$V$', 'Interpreter', 'latex', 'FontSize', 14);
-    ylabel('$P_{total}$', 'Interpreter', 'latex', 'FontSize', 14);
-    title('Total power versus forward speed', 'FontSize', 16);
-    legend('Total Power', 'Location', 'northeast', 'FontSize', 12);
-    ylim([0, 1e6]);
+    xlabel('$V$ [m/s]', 'Interpreter', 'latex', 'FontSize', 14);
+    ylabel('$P_{total}$ [kW]', 'Interpreter', 'latex', 'FontSize', 14);
+    legend([h1, h2, h3, h4], {'Total Power', 'Parasite Power', 'Induced Power', 'Tail Rotor Power'}, ...
+           'Location', 'northeast', 'FontSize', 12);
+    ylim([0, 1e3]);
     set(gca, 'FontSize', 12);
+
+    % Plot grey dotted line at minimum power and vertical line to corresponding V
+    minColor = [0.6 0.6 0.6]; % grey
+    Pmin_kW = P_min/1e3;
+    Vmin = V_Pmin;
+    % horizontal dotted line at Pmin (exclude from legend)
+    h_min_h = plot([min(V) max(V)], [Pmin_kW Pmin_kW], ':', 'Color', minColor, 'LineWidth', 1.2);
+    set(get(get(h_min_h,'Annotation'),'LegendInformation'),'IconDisplayStyle','off');
+    % vertical dotted line at Vmin (exclude from legend)
+    h_min_v = plot([Vmin Vmin], [0 Pmin_kW], ':', 'Color', minColor, 'LineWidth', 1.2);
+    set(get(get(h_min_v,'Annotation'),'LegendInformation'),'IconDisplayStyle','off');
+
+    % Plot tangent dashed line (slope at idx_range) and vertical line to corresponding V_range
+    dP_dV = gradient(P_total, V); % dP/dV
+    m_tan = dP_dV(idx_range); % slope at tangent point
+    % Tangent line through (V_range, P_range)
+    V_tan = linspace(min(V), max(V), 100);
+    P_tan = P_range + m_tan * (V_tan - V_range);
+    % convert to kW and plot (exclude from legend)
+    h_tan = plot(V_tan, P_tan*1e-3, '--', 'Color', minColor, 'LineWidth', 1.2);
+    set(get(get(h_tan,'Annotation'),'LegendInformation'),'IconDisplayStyle','off');
+    % vertical dashed line at V_range (exclude from legend)
+    h_vrange = plot([V_range V_range], [0 P_range]*1e-3, '--', 'Color', minColor, 'LineWidth', 1.2);
+    set(get(get(h_vrange,'Annotation'),'LegendInformation'),'IconDisplayStyle','off');
 end

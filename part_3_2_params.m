@@ -5,17 +5,6 @@ close all;
 %% Setup
 run('constants.m')
 
-%% Gains
-Kp_0 = -0.01;
-Ki_0 = 0;
-Kd_0 = 0;
-N_0 = 0;
-
-Kp_c = -0.01;
-Ki_c = 0;
-Kd_c = 0;
-N_c = 0;
-
 %% Signal bus setup
 % States definition
 states.u = 0;
@@ -23,6 +12,8 @@ states.w = 0;
 states.q = 0;
 states.theta_f = 0;
 states.V_z = 0;
+states.pos = 0;
+states.h = 0;
 
 Simulink.Bus.createObject(states);
 

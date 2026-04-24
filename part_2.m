@@ -2,7 +2,7 @@ clear; close all; clc;
 
 run('constants.m');
 rho = 1.225;
-a_l = 5.7;
+a_l = 5.73;
 
 %% Inputs
 V = 20;
@@ -13,14 +13,12 @@ theta0  = deg2rad(6);
 theta1c = deg2rad(2);
 theta1s = deg2rad(1);
 
-vi = 5;
+vi = 6.3;
 
 %% Rotor parameters
 R = R_main;
 c = c_main;
 Omega = tip_speed_main / R_main;
-
-mu = V / (Omega * R);
 
 %% Azimuth and pitch
 nPsi = 721;
@@ -37,14 +35,17 @@ I_blade = J_main / N_blade_main;
 mu = V / (Omega * R);
 lambda_i = vi / (Omega * R);
 lambda_c = 0;
+lambda = lambda_c + lambda_i;
 
-gamma = rho * c * a_l * R^4 / I_blade;
+Lock = rho * c * a_l * R^4 / I_blade;
 
-a0 = (gamma/8) * ( theta0*(1 + mu^2) - (4/3)*(lambda_i + lambda_c) );
+a0 = (Lock/2) * ((1+mu^2)/4 * theta0 + lambda/3 - ...
+        (1/3)*mu*theta1s + (mu/6)* (p/Omega));
+a1 = 1/(1-mu^2/2) * (4*mu * ((2/3) * theta0 + lambda/2) - ...
+        (1 + (3/2)*mu^2)*theta1s - (p/Omega) - (16/Lock)*(q/Omega));
+b1 = 1/(1+mu^2/2) * ((4/3)*mu*a0 + (1+mu^2/2)*theta1c + ...
+        (q/Omega) - (16/Lock)*(p/Omega));
 
-a1 = ( (8/3)*mu*theta0 - mu*(lambda_i + lambda_c) - q/Omega ) / (1 - mu^2/2);
-
-b1 = ( -(4/3)*mu*(q/Omega) ) / (1 + mu^2/2);
 
 
 beta = a0 - a1*cos(psi) - b1*sin(psi);
@@ -60,13 +61,13 @@ ylabel('\beta [deg]');
 title('Blade flapping angle');
 
 %% Angle of attack
-rbar_vec = linspace(0.2, 0.95, 30);
+rbar_vec = linspace(hinge_offset, 0.95, 30);
 alpha_mat = zeros(length(rbar_vec), length(psi));
 
 for ir = 1:length(rbar_vec)
     r = rbar_vec(ir) * R;
     UT = Omega*r + V*sin(psi);
-    UP = vi + r*beta_dot + q*r*cos(psi) + p*r*sin(psi);
+    UP = vi - r*beta_dot - V*beta.*cos(psi) + q*r*cos(psi) + p*r*sin(psi);
     phi = atan2(UP, UT);
     alpha_mat(ir,:) = theta - phi;
 end
@@ -87,31 +88,37 @@ legend('r/R = 0.3','r/R = 0.5','r/R = 0.7','r/R = 0.9','Location','best');
 
 %% Angle of attack contours
 [PsiGrid, RbarGrid] = meshgrid(psi, rbar_vec);
-X = - RbarGrid .* cos(PsiGrid);
+X = RbarGrid .* cos(PsiGrid);
 Y = RbarGrid .* sin(PsiGrid);
 
 alpha_deg = rad2deg(alpha_mat);
-levels = floor(min(alpha_deg(:))) : ceil(max(alpha_deg(:)));
+
+% Clip values below -10 so they are not color coded (set to -10 for plotting)
+alpha_plot = max(alpha_deg, -10);
+
+levels = -10 : ceil(max(alpha_plot(:)));
 
 figure;
-contourf(X, Y, alpha_deg, 20, 'LineColor', 'none');
-colorbar;
+contourf(X, Y, alpha_plot, 20, 'LineColor', 'none');
+c = colorbar;
+clim([-10, max(alpha_plot(:))]); % ensure colorbar starts at -10
 axis equal;
 xlabel('x/R');
 ylabel('y/R');
-title('Angle of attack contours');
+title('Angle of attack contours (values < -10 clipped)');
 
 figure;
-[C,h] = contour(X, Y, alpha_deg, levels, 'LineWidth', 1.5);
+[C,h] = contour(X, Y, alpha_plot, levels, 'LineWidth', 1.5);
 clabel(C, h, 'FontSize', 10, 'Color', 'k');
 
 colormap(jet);
 colorbar;
+clim([-10, max(alpha_plot(:))]);
 
 axis equal;
 xlabel('x/R');
 ylabel('y/R');
-title('Angle of attack contour lines');
+title('Angle of attack contour lines (values < -10 clipped)');
 
 %% Fourier fit
 A0 = mean(beta);
@@ -134,11 +141,64 @@ ylabel('\beta [deg]');
 title('Fourier fit');
 legend('\beta(\psi)', 'Fit', 'Location', 'best');
 
-%% Results
-fprintf('mu = %.4f\n', mu);
-fprintf('a0 = %.4f deg\n', rad2deg(a0_fit));
-fprintf('a1 = %.4f deg\n', rad2deg(a1_fit));
-fprintf('b1 = %.4f deg\n', rad2deg(b1_fit));
-
-
-
+% %% Results
+% fprintf('mu = %.4f\n', mu);
+% fprintf('a0 = %.4f deg\n', rad2deg(a0_fit));
+% fprintf('a1 = %.4f deg\n', rad2deg(a1_fit));
+% fprintf('b1 = %.4f deg\n', rad2deg(b1_fit));
+% 
+% 
+% 
+% % Blade pitch angle contour vs radial position
+% rbar_vec_full = linspace(0.2, 0.99, 80);      % finer radial grid for plotting
+% [PsiGrid_full, RbarGrid_full] = meshgrid(psi, rbar_vec_full);
+% 
+% % compute theta at each psi and rbar (theta is independent of r here but depends on psi)
+% Theta_mat = theta(:).' .* ones(length(rbar_vec_full), length(psi)); % size: nr x nPsi
+% 
+% % convert to degrees for plotting
+% Theta_deg = rad2deg(Theta_mat);
+% 
+% % map to Cartesian for contour in rotor disk coordinates
+% X_theta = RbarGrid_full .* cos(PsiGrid_full);
+% Y_theta = RbarGrid_full .* sin(PsiGrid_full);
+% 
+% figure;
+% contourf(X_theta, Y_theta, Theta_deg, 20, 'LineColor', 'none');
+% colorbar;
+% axis equal;
+% xlabel('x/R');
+% ylabel('y/R');
+% title('Blade pitch angle \theta [deg]');
+% 
+% % compute inflow angle phi over the same grid used for angles of attack
+% % reuse UT and UP expressions but evaluate over rbar_vec_full and psi
+% [PsiPhiGrid, RbarPhiGrid] = meshgrid(psi, rbar_vec_full);
+% r_mat = RbarPhiGrid * R;
+% 
+% % Local velocities
+% UT_mat = Omega .* r_mat + V .* sin(PsiPhiGrid);
+% % beta_dot needs beta derivative at each psi; interpolate dbeta_dpsi (same length as psi)
+% dbeta_dpsi_interp = interp1(psi, dbeta_dpsi, PsiPhiGrid(1,:), 'linear', 'extrap');
+% % repeat for each radial row
+% dbeta_dpsi_mat = repmat(dbeta_dpsi_interp, size(RbarPhiGrid,1), 1);
+% beta_dot_mat = dbeta_dpsi_mat * Omega;
+% 
+% UP_mat = vi - r_mat .* beta_dot_mat + q .* r_mat .* cos(PsiPhiGrid) + p .* r_mat .* sin(PsiPhiGrid);
+% 
+% % inflow angle phi
+% phi_mat = atan2(UP_mat, UT_mat); % radians
+% phi_deg_mat = rad2deg(phi_mat);
+% 
+% % map to Cartesian (using Rbar grid already in RbarPhiGrid)
+% X_phi = RbarPhiGrid .* cos(PsiPhiGrid);
+% Y_phi = RbarPhiGrid .* sin(PsiPhiGrid);
+% 
+% % contour plot
+% figure;
+% contourf(X_phi, Y_phi, phi_deg_mat, 20, 'LineColor', 'none');
+% colorbar;
+% axis equal;
+% xlabel('x/R');
+% ylabel('y/R');
+% title('Inflow angle \phi [deg]');

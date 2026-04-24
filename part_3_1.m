@@ -81,10 +81,10 @@ if plots
     figure;
     plot(V, theta_c, 'LineWidth', 1.5); hold on;
     plot(V, theta_0, 'LineWidth', 1.5);
-    ylabel('Control deflection [deg]', 'FontSize', 14);
-    xlabel('Velocity V [m/s]', 'FontSize', 14);
+    ylabel('Control deflection [deg]', 'Interpreter', 'latex', 'FontSize', 14);
+    xlabel('$V$ [m/s]', 'Interpreter', 'latex', 'FontSize', 14);
     grid on;
-    legend('Long. cyclic, a_1','Collective, \theta_0','Location','best');
+    legend('Long. cyclic, \theta_c','Collective, \theta_0','Location','best');
     set(gca, 'FontSize', 12);
 end
 
