@@ -57,7 +57,7 @@ p.A_eq = A_eq;
 
 p.cl_alpha = 5.73;
 p.Iy = 22713;
-p.I_bl = 524.4986;
+p.I_bl = 640.6240;
 p.Lock = p.rho * p.cl_alpha * c_main * R_main^4 / p.I_bl; % lock number
 p.h = 0.9;
 

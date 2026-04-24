@@ -71,9 +71,9 @@ if plots
     plot(V, vi_glauert, 'LineWidth', 1.8); hold on;
     plot(V, vi_lowspeed, '--', 'LineWidth', 1.5);
     grid on;
-    xlabel('Forward speed V [m/s]', 'FontSize', 14);
-    ylabel('Induced velocity v_i [m/s]', 'FontSize', 14);
-    title('Main rotor induced velocity versus forward speed', 'FontSize', 16);
+    xlabel('Forward speed $V$ [m/s]', 'Interpreter', 'latex', 'FontSize', 14);
+    ylabel('Induced velocity $v_i$ [m/s]', 'Interpreter', 'latex', 'FontSize', 14);
+    % title('Main rotor induced velocity versus forward speed', 'FontSize', 16);
     legend('Glauert numerical', 'Low-speed approximation', ...
            'Location', 'northeast', 'FontSize', 12);
     set(gca, 'FontSize', 12);
@@ -92,7 +92,7 @@ if plots
     grid on;
     xlabel('$\bar{V} = V / v_{i,h}$', 'Interpreter', 'latex', 'FontSize', 14);
     ylabel('$\bar{v}_i = v_i / v_{i,h}$', 'Interpreter', 'latex', 'FontSize', 14);
-    title('Non-dimensional induced velocity versus forward speed', 'FontSize', 16);
+    % title('Non-dimensional induced velocity versus forward speed', 'FontSize', 16);
     legend('Glauert numerical', 'Low-speed approximation', ...
            'Location', 'northeast', 'FontSize', 12);
     set(gca, 'FontSize', 12);
